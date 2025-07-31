@@ -1,0 +1,50 @@
+{
+  "name": "specsync",
+  "displayName": "SpecSync",
+  "description": "Formal specification integration for VSCode",
+  "version": "1.0.0",
+  "publisher": "specsync",
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:specsync.showSpec",
+    "onCommand:specsync.editSpec",
+    "onCommand:specsync.runProof"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "specsync.showSpec",
+        "title": "Show Specification",
+        "category": "SpecSync"
+      },
+      {
+        "command": "specsync.editSpec",
+        "title": "Edit Specification",
+        "category": "SpecSync"
+      },
+      {
+        "command": "specsync.runProof",
+        "title": "Run Lean4 Proof",
+        "category": "SpecSync"
+      }
+    ],
+    "configuration": {
+      "title": "SpecSync",
+      "properties": {
+        "specsync.apiUrl": {
+          "type": "string",
+          "default": "http://localhost:3000",
+          "description": "SpecSync API URL"
+        },
+        "specsync.autoShowSpec": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically show specifications when hovering over functions"
+        }
+      }
+    }
+  }
+}
