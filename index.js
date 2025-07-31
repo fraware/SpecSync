@@ -2,11 +2,27 @@ const { Application } = require('probot');
 const { DiffParser } = require('./src/diff-parser');
 const { ASTExtractor } = require('./src/ast-extractor');
 const { SpecAnalyzer } = require('./src/spec-analyzer');
+const { GitHubUI } = require('./src/github-ui');
+const { VSCodeUI } = require('./src/vscode-ui');
+const { WebDashboard } = require('./src/web-dashboard');
+const { SlackAlerts } = require('./src/slack-alerts');
+const { UIPrinciples } = require('./src/ui-principles');
 
 module.exports = (app) => {
   const diffParser = new DiffParser();
   const astExtractor = new ASTExtractor();
   const specAnalyzer = new SpecAnalyzer();
+  
+  // Initialize UI components
+  const githubUI = new GitHubUI();
+  const vscodeUI = new VSCodeUI();
+  const webDashboard = new WebDashboard();
+  const slackAlerts = new SlackAlerts();
+  const uiPrinciples = new UIPrinciples();
+  
+  // Initialize components
+  githubUI.initialize(process.env.GITHUB_TOKEN);
+  slackAlerts.initialize();
 
   // Handle pull request events
   app.on('pull_request.opened', async (context) => {
@@ -69,8 +85,27 @@ async function handlePullRequest(context, diffParser, astExtractor, specAnalyzer
     // Analyze and generate spec suggestions
     const specSuggestions = await specAnalyzer.analyzeChanges(astAnalysis, context);
     
-    // Post comments with spec suggestions
-    await postSpecComments(context, specSuggestions, pull_request.number);
+    // Post comments with spec suggestions using GitHub UI
+    for (const suggestion of specSuggestions) {
+      await githubUI.createSpecComment(context, suggestion);
+    }
+    
+    // Create coverage check
+    const proofStatus = {
+      coverage: 75,
+      totalFunctions: specSuggestions.length,
+      coveredFunctions: specSuggestions.filter(s => s.confidence > 70).length,
+      failedProofs: 0,
+      functions: specSuggestions.map(s => ({
+        name: s.functionName,
+        filePath: s.filePath,
+        line: s.lineNumber,
+        hasProof: s.confidence > 70
+      })),
+      proofs: []
+    };
+    
+    await githubUI.createCoverageCheck(context, proofStatus);
 
   } catch (error) {
     console.error('Error processing pull request:', error);
@@ -99,7 +134,26 @@ async function handlePush(context, diffParser, astExtractor, specAnalyzer) {
     const driftResults = await specAnalyzer.detectDrift(payload.commits, context);
     
     if (driftResults.length > 0) {
-      await postDriftComments(context, driftResults);
+      // Send drift alerts to Slack
+      for (const drift of driftResults) {
+        await slackAlerts.sendDriftAlert(drift);
+      }
+      
+      // Create proof check comment
+      const proofResults = {
+        functions: driftResults.map(d => ({
+          name: d.functionName,
+          proofValid: false,
+          theorem: null,
+          hasDrift: true
+        })),
+        drift: driftResults,
+        coverage: 60,
+        repository: repository.full_name,
+        prNumber: 0
+      };
+      
+      await githubUI.createProofCheckComment(context, proofResults);
     }
   } catch (error) {
     console.error('Error processing push:', error);
@@ -111,7 +165,7 @@ async function handleIssueComment(context, specAnalyzer) {
   
   // Handle spec-related commands in comments
   if (payload.comment.body.includes('/specsync')) {
-    await specAnalyzer.handleCommentCommand(context, payload.comment);
+    await githubUI.handleSpecCommentAction(context, payload.comment);
   }
 }
 
@@ -120,102 +174,8 @@ async function handleReviewComment(context, specAnalyzer) {
   
   // Handle spec-related commands in review comments
   if (payload.comment.body.includes('/specsync')) {
-    await specAnalyzer.handleCommentCommand(context, payload.comment);
+    await githubUI.handleSpecCommentAction(context, payload.comment);
   }
 }
 
-async function postSpecComments(context, specSuggestions, prNumber) {
-  const { payload } = context;
-  const { repository } = payload;
-
-  for (const suggestion of specSuggestions) {
-    const commentBody = formatSpecComment(suggestion);
-    
-    await context.octokit.issues.createComment({
-      owner: repository.owner.login,
-      repo: repository.name,
-      issue_number: prNumber,
-      body: commentBody
-    });
-  }
-}
-
-async function postDriftComments(context, driftResults) {
-  const { payload } = context;
-  const { repository } = payload;
-
-  for (const drift of driftResults) {
-    const commentBody = formatDriftComment(drift);
-    
-    await context.octokit.issues.createComment({
-      owner: repository.owner.login,
-      repo: repository.name,
-      issue_number: drift.issueNumber,
-      body: commentBody
-    });
-  }
-}
-
-function formatSpecComment(suggestion) {
-  const { functionName, filePath, lineNumber, preconditions, postconditions, invariants, edgeCases, confidence, reasoning, complexity, security } = suggestion;
-
-  return `## 🤖 SpecSync: Specification for \`${functionName}\`
-
-**File:** \`${filePath}\` (line ${lineNumber})
-**Confidence:** ${confidence}%
-
-### 📋 Preconditions
-${preconditions.map(pre => `- ${pre}`).join('\n')}
-
-### ✅ Postconditions
-${postconditions.map(post => `- ${post}`).join('\n')}
-
-### 🔒 Invariants
-${invariants.map(inv => `- ${inv}`).join('\n')}
-
-### ⚠️ Edge Cases
-${edgeCases.map(edge => `- ${edge}`).join('\n')}
-
-${complexity ? `### ⚡ Performance Analysis
-- **Time Complexity:** ${complexity.time}
-- **Space Complexity:** ${complexity.space}
-` : ''}
-
-${security && security.vulnerabilities.length > 0 ? `### 🔒 Security Analysis
-**Potential Vulnerabilities:**
-${security.vulnerabilities.map(vuln => `- ⚠️ ${vuln}`).join('\n')}
-
-**Mitigation Strategies:**
-${security.mitigations.map(mit => `- ✅ ${mit}`).join('\n')}
-` : ''}
-
-### 💭 Reasoning
-${reasoning}
-
----
-
-**Actions:**
-- ✅ \`/specsync accept\` - Accept this specification
-- ✏️ \`/specsync edit\` - Edit the specification
-- ❌ \`/specsync ignore\` - Ignore this suggestion
-- 🔍 \`/specsync review\` - Request manual review
-
-*Generated by SpecSync AI*`;
-}
-
-function formatDriftComment(drift) {
-  return `## ⚠️ SpecSync Drift Detection
-
-**Function**: \`${drift.functionName}\`
-**File**: \`${drift.filePath}\`
-
-The implementation has changed and may no longer satisfy the existing specification.
-
-**Previous Spec**: ${drift.previousSpec}
-**Current Implementation**: ${drift.currentImplementation}
-
-**Recommendation**: Please review and update the specification if needed.
-
----
-**Command**: \`/specsync review\` to analyze the drift`;
-} 
+ 

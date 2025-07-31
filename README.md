@@ -58,6 +58,9 @@ DASHBOARD_PORT=3001
 SLACK_BOT_TOKEN=your_slack_bot_token
 SLACK_CHANNEL=#specsync
 VSCODE_EXTENSION_PATH=./vscode-extension
+
+# UI Framework
+SPECSYNC_EXPERIMENTAL=suggest-only
 ```
 
 ### GitHub App Configuration
@@ -136,9 +139,33 @@ git push heroku main
       "Use parameterized queries"
     ]
   },
-  "confidence": 85
+  "confidence": 0.85,
+  "rationale": "Function modifies critical state and requires comprehensive validation"
 }
 ```
+
+### UI Framework Usage
+
+```bash
+# Run the complete UI demo
+npm run ui-demo
+
+# Start the web dashboard
+npm run dashboard
+
+# Generate VSCode extension
+node -e "const { VSCodeUI } = require('./src/vscode-ui'); new VSCodeUI().generateVSCodeExtension();"
+```
+
+### UI Components Demo
+
+The UI framework provides comprehensive components across all surfaces:
+
+- **GitHub Integration**: Spec comments, coverage badges, proof check sidebar
+- **VSCode Plugin**: Inline annotations, suggestion panel, proof runner
+- **Web Dashboard**: Coverage maps, drift monitoring, audit explorer
+- **Slack Alerts**: Drift notifications, proof failure alerts
+- **Design Principles**: Height constraints, confidence transparency, progressive enhancement
 
 ### Advanced Lean4 Generation
 ```lean

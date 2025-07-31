@@ -1,30 +1,55 @@
 # SpecSync VSCode Extension
 
-This extension provides integration with SpecSync for formal specification management in VSCode.
+A comprehensive VSCode extension for SpecSync that provides inline specification annotations, real-time suggestions, and local proof execution.
 
 ## Features
 
-- **Inline Specification Display**: Hover over functions to see their specifications
-- **Specification Editing**: Edit preconditions, postconditions, invariants, and edge cases
-- **Lean4 Proof Execution**: Run Lean4 proofs directly from VSCode
-- **Real-time Updates**: Specifications update automatically when changed
+### SpecLens Inline Annotations
+- Display verified invariants above each function
+- Click to view full specification details
+- Edit specifications inline
 
-## Commands
+### Real-time Suggestion Panel
+- Get spec suggestions as you type
+- Add suggestions with one click
+- Confidence scoring for each suggestion
 
-- `SpecSync: Show Specification` - Display specification for the function at cursor
-- `SpecSync: Edit Specification` - Open specification editor
-- `SpecSync: Run Lean4 Proof` - Execute Lean4 proof for current function
-
-## Configuration
-
-- `specsync.apiUrl` - SpecSync API URL (default: http://localhost:3000)
-- `specsync.autoShowSpec` - Automatically show specifications on hover (default: true)
+### Lean Proof Runner
+- Execute Lean proofs locally
+- Progress tracking with detailed output
+- Generate proof artifacts and reports
 
 ## Installation
 
-1. Build the extension: `npm run compile`
-2. Package the extension: `vsce package`
-3. Install the .vsix file in VSCode
+1. Install the extension from the VSCode marketplace
+2. Configure your Lean path in settings
+3. Open a project with specifications
+
+## Usage
+
+### Viewing Specifications
+- Hover over functions to see their specifications
+- Click on spec annotations to view details
+- Use the command palette: "SpecSync: Show Specification"
+
+### Adding Suggestions
+- Type code and watch for suggestions in the sidebar
+- Click on suggestions to add them to your function
+- Suggestions appear based on code patterns
+
+### Running Proofs
+- Use command palette: "SpecSync: Run Lean Proof"
+- View progress and results in the output panel
+- Proof artifacts are saved to `.specsync/artifacts`
+
+## Configuration
+
+```json
+{
+  "specsync.specCachePath": ".specsync/spec.json",
+  "specsync.leanPath": "lean"
+}
+```
 
 ## Development
 
@@ -34,9 +59,6 @@ npm run compile
 npm run watch
 ```
 
-## Usage
+## License
 
-1. Open a JavaScript/TypeScript/Python/Java file
-2. Hover over a function to see its specification
-3. Use commands to edit specifications or run proofs
-4. Specifications are automatically synced with SpecSync API
+MIT License

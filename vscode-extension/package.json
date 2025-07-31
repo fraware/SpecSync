@@ -1,16 +1,17 @@
 {
-  "name": "specsync",
-  "displayName": "SpecSync",
-  "description": "Formal specification integration for VSCode",
+  "name": "specsync-spec-lens",
+  "displayName": "SpecSync SpecLens",
+  "description": "Inline specification annotations for functions",
   "version": "1.0.0",
   "publisher": "specsync",
   "categories": [
+    "Programming Languages",
     "Other"
   ],
   "activationEvents": [
-    "onCommand:specsync.showSpec",
-    "onCommand:specsync.editSpec",
-    "onCommand:specsync.runProof"
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:python"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -27,22 +28,27 @@
       },
       {
         "command": "specsync.runProof",
-        "title": "Run Lean4 Proof",
+        "title": "Run Lean Proof",
         "category": "SpecSync"
       }
     ],
     "configuration": {
       "title": "SpecSync",
       "properties": {
-        "specsync.apiUrl": {
+        "specsync.specCachePath": {
           "type": "string",
-          "default": "http://localhost:3000",
-          "description": "SpecSync API URL"
+          "default": ".specsync/spec.json",
+          "description": "Path to spec cache file"
         },
-        "specsync.autoShowSpec": {
-          "type": "boolean",
-          "default": true,
-          "description": "Automatically show specifications when hovering over functions"
+        "specsync.leanPath": {
+          "type": "string",
+          "default": "lean",
+          "description": "Path to Lean executable"
+        },
+        "specsync.confidenceThreshold": {
+          "type": "number",
+          "default": 0.7,
+          "description": "Minimum confidence for displaying suggestions"
         }
       }
     }

@@ -9,7 +9,8 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
-    "demo": "node demo.js"
+    "demo": "node demo.js",
+    "ui-demo": "node ui-demo.js"
   },
   "dependencies": {
     "@octokit/rest": "^20.0.1",
