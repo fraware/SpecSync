@@ -1,10 +1,14 @@
 # SpecSync
 
-A **state-of-the-art formal specification system** that automatically analyzes code changes and generates comprehensive formal specifications using advanced LLM techniques and Lean4 theorem proving.
+A formal specification system that automatically analyzes code changes and generates comprehensive formal specifications using advanced LLM techniques and Lean4 theorem proving.
 
 ## Overview
 
 SpecSync is a GitHub App that provides end-to-end formal verification capabilities from GitHub integration to developer feedback loops, featuring advanced security analysis, performance guarantees, and comprehensive theorem proving.
+
+<p align="center">
+  <img src=".github/assets/SpecSync1.png" alt="SpecSync Logo" width="300"/>
+</p>
 
 ## Advanced Architecture
 
