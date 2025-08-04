@@ -13,28 +13,28 @@ SpecSync is a GitHub App that provides end-to-end formal verification capabiliti
 ## Advanced Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   GitHub PR     │───▶│   Diff Parser   │───▶│   AST Extractor │
-│   Webhook       │    │   (Multi-lang)  │    │   (Tree-sitter) │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────┐    ┌─────────────────┐     ┌─────────────────┐
+│   GitHub PR     │───▶│   Diff Parser   │───▶│  AST Extractor  │
+│   Webhook       │    │   (Multi-lang)  │     │   (Tree-sitter) │
+└─────────────────┘    └─────────────────┘     └─────────────────┘
                                 │                       │
                                 ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Spec Cache    │◀───│  Spec Analyzer  │◀───│  LLM Client    │
-│   (Advanced)    │    │   (Enhanced)    │    │ (Multi-Provider)│
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────┐    ┌─────────────────┐     ┌─────────────────┐
+│   Spec Cache    │◀───│  Spec Analyzer  │◀───│  LLM Client     │
+│   (Advanced)    │    │   (Enhanced)    │     │ (Multi-Provider)│
+└─────────────────┘    └─────────────────┘     └─────────────────┘
                                 │
                                 ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+┌─────────────────┐    ┌─────────────────┐     ┌─────────────────┐
 │   Lean4 Gen     │───▶│  CI Integration │───▶│  Proof Valid    │
-│   (Security)    │    │   (Sigstore)    │    │   (Advanced)    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+│   (Security)    │    │   (Sigstore)    │     │   (Advanced)    │
+└─────────────────┘    └─────────────────┘     └─────────────────┘
                                 │
                                 ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+┌─────────────────┐    ┌─────────────────┐     ┌─────────────────┐
 │  Coverage Track │───▶│  Dashboard UI   │───▶│  Dev Feedback   │
-│   (Real-time)   │    │   (Multi-framework)│  │   (Slack+VSCode)│
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+│   (Real-time)   │    │ (Multi-framework)│    │   (Slack+VSCode)│
+└─────────────────┘    └─────────────────┘     └─────────────────┘
 ```
 
 ## Configuration
